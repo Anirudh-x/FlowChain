@@ -2,6 +2,7 @@ import express from 'express';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
+import BusinessRegistration from '../models/BusinessRegistration.js';
 
 const router = express.Router();
 
@@ -19,6 +20,17 @@ router.post('/register', async (req, res) => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `business_registration_${timestamp}.pdf`;
     const filepath = path.join(pdfsDir, filename);
+
+    // Save to MongoDB
+    const registrationData = {
+      ...formData,
+      pdfFilename: filename,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const newRegistration = new BusinessRegistration(registrationData);
+    await newRegistration.save();
 
     // Create PDF document
     const doc = new PDFDocument();
@@ -111,9 +123,10 @@ router.post('/register', async (req, res) => {
     stream.on('finish', () => {
       res.json({
         success: true,
-        message: 'Business registration data saved to PDF',
+        message: 'Business registration data saved to database and PDF generated',
         filename: filename,
-        filepath: filepath
+        filepath: filepath,
+        registrationId: newRegistration._id
       });
     });
 
