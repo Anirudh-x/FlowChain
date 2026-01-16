@@ -85,10 +85,10 @@ export function LandingPage() {
                             className="flex flex-col sm:flex-row gap-4"
                         >
                             <button
-                                onClick={() => navigate("/dashboard")}
+                                onClick={() => navigate("/register")}
                                 className="group px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-semibold shadow-lg shadow-indigo-500/30 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-300 flex items-center justify-center gap-2"
                             >
-                                Enter Dashboard
+                                Get Started
                                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" />
                             </button>
 
