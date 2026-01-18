@@ -17,7 +17,8 @@ import {
   Sparkles,
   Star,
   Trophy,
-  Zap
+  Zap,
+  FileText
 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from './ui/card';
 import { ThemeToggle } from './ThemeToggle';
@@ -78,6 +79,12 @@ const BusinessRegistration = () => {
       color: 'from-gray-500 to-slate-600',
       description: 'Final legal requirements'
     },
+    {
+      title: 'Inventory PDF Upload',
+      icon: FileText,
+      color: 'from-red-500 to-pink-600',
+      description: 'Upload your inventory details PDF'
+    },
   ];
 
   const [formData, setFormData] = useState({
@@ -126,6 +133,9 @@ const BusinessRegistration = () => {
     acceptTerms: false,
     acceptPrivacy: false,
     consentAlerts: false,
+
+    // Step 9: Inventory PDF Upload
+    inventoryPDF: null,
   });
 
   const updateFormData = (field, value) => {
@@ -149,23 +159,44 @@ const BusinessRegistration = () => {
     setShowConfetti(true);
 
     try {
-      // Send data to backend to generate PDF
+      // Prepare form data for submission
+      const submitData = new FormData();
+
+      // Add all form fields except the file
+      Object.keys(formData).forEach(key => {
+        if (key !== 'inventoryPDF') {
+          const value = formData[key];
+          if (Array.isArray(value)) {
+            // Serialize arrays as JSON strings
+            submitData.append(key, JSON.stringify(value));
+          } else {
+            submitData.append(key, value);
+          }
+        }
+      });
+
+      // Add the PDF file if it exists
+      if (formData.inventoryPDF) {
+        submitData.append('inventoryPDF', formData.inventoryPDF);
+      }
+
+      // Send data to backend
       const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+        body: submitData, // No Content-Type header for FormData
       });
 
       const result = await response.json();
 
       if (result.success) {
-        console.log('PDF generated successfully:', result.filename);
-        // You can store the filename in localStorage or state for later reference
+        console.log('Registration completed successfully:', result.filename);
+        // Store the PDF filename for reference
         localStorage.setItem('businessRegistrationPDF', result.filename);
+        if (result.inventoryPDFFilename) {
+          localStorage.setItem('inventoryPDF', result.inventoryPDFFilename);
+        }
       } else {
-        console.error('Error generating PDF:', result.message);
+        console.error('Error during registration:', result.message);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -180,7 +211,7 @@ const BusinessRegistration = () => {
         }
       });
       console.log('User metadata updated successfully');
-      
+
       // Wait for metadata to sync
       await new Promise(resolve => setTimeout(resolve, 1000));
     } catch (error) {
@@ -212,6 +243,8 @@ const BusinessRegistration = () => {
         return formData.currency && formData.timeZone && formData.language;
       case 7:
         return formData.acceptTerms && formData.acceptPrivacy;
+      case 8:
+        return formData.inventoryPDF !== null;
       default:
         return true;
     }
@@ -698,6 +731,46 @@ const BusinessRegistration = () => {
             </div>
           </div>
         );
+      case 8:
+        return (
+          <div className="space-y-6">
+            <div>
+              <motion.label
+                className="block text-sm font-medium mb-2 text-foreground"
+                whileHover={{ scale: 1.02 }}
+              >
+                Upload Inventory PDF
+              </motion.label>
+              <motion.div
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors duration-200"
+                whileHover={{ scale: 1.02 }}
+              >
+                <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) => updateFormData('inventoryPDF', e.target.files[0])}
+                  className="hidden"
+                  id="pdf-upload"
+                />
+                <label
+                  htmlFor="pdf-upload"
+                  className="cursor-pointer text-primary hover:text-primary/80 font-medium"
+                >
+                  Click to upload PDF
+                </label>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Upload a PDF containing your inventory details (stocks, quantities, etc.) for AI processing
+                </p>
+                {formData.inventoryPDF && (
+                  <p className="text-sm text-green-600 mt-2">
+                    Selected: {formData.inventoryPDF.name}
+                  </p>
+                )}
+              </motion.div>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
@@ -996,10 +1069,10 @@ const BusinessRegistration = () => {
           {/* Bottom gradient */}
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/50 to-transparent dark:from-slate-950/50 pointer-events-none" />
         </div>
-        </div>
-        </div>
-        );
+      </div>
+    </div>
+  );
 };
 
-        export default BusinessRegistration;
+export default BusinessRegistration;
 
