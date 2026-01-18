@@ -18,7 +18,8 @@ export function RoleBasedRoute({ children, allowedRoles }) {
   }
 
   // Get user role from metadata (you'll set this in Clerk dashboard)
-  const userRole = user?.publicMetadata?.role || 'worker';
+  // TESTING: Everyone gets admin access
+  const userRole = 'admin'; // user?.publicMetadata?.role || 'worker';
 
   // Check if user's role is allowed
   if (!allowedRoles.includes(userRole)) {
