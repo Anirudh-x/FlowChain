@@ -28,9 +28,9 @@ const businessRegistrationSchema = new mongoose.Schema({
   primaryIndustry: { type: String },
 
   // Operational Scale
-  warehouses: { type: String }, 
-  stores: { type: String }, 
-  skus: { type: String }, 
+  warehouses: { type: String },
+  stores: { type: String },
+  skus: { type: String },
 
   // Inventory Handling Basics
   inventoryTypes: [{ type: String }],
@@ -46,6 +46,9 @@ const businessRegistrationSchema = new mongoose.Schema({
   acceptTerms: { type: Boolean, required: true },
   acceptPrivacy: { type: Boolean, required: true },
   consentAlerts: { type: Boolean, default: false },
+
+  // Inventory PDF
+  inventoryPDFFilename: { type: String },
 
   // Metadata
   pdfFilename: { type: String },

@@ -2,6 +2,7 @@ import express from 'express';
 import PDFDocument from 'pdfkit';
 import fs from 'fs';
 import path from 'path';
+import multer from 'multer';
 import BusinessRegistration from '../models/BusinessRegistration.js';
 
 const router = express.Router();
@@ -12,11 +13,50 @@ if (!fs.existsSync(pdfsDir)) {
   fs.mkdirSync(pdfsDir);
 }
 
-router.post('/register', async (req, res) => {
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, pdfsDir);
+  },
+  filename: (req, file, cb) => {
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    cb(null, `inventory_${timestamp}_${file.originalname}`);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+router.post('/register', upload.single('inventoryPDF'), async (req, res) => {
   try {
     const formData = req.body;
+    let inventoryPDFFilename = null;
 
-    // Generate unique filename
+    // Parse JSON strings back to arrays
+    if (formData.supplyChainRoles && typeof formData.supplyChainRoles === 'string') {
+      try {
+        formData.supplyChainRoles = JSON.parse(formData.supplyChainRoles);
+      } catch (e) {
+        console.error('Error parsing supplyChainRoles:', e);
+        formData.supplyChainRoles = [];
+      }
+    }
+
+    if (formData.inventoryTypes && typeof formData.inventoryTypes === 'string') {
+      try {
+        formData.inventoryTypes = JSON.parse(formData.inventoryTypes);
+      } catch (e) {
+        console.error('Error parsing inventoryTypes:', e);
+        formData.inventoryTypes = [];
+      }
+    }
+
+    // Handle uploaded PDF
+    if (req.file) {
+      inventoryPDFFilename = req.file.filename;
+      console.log('Inventory PDF uploaded:', inventoryPDFFilename);
+    }
+
+    // Generate unique filename for registration PDF
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `business_registration_${timestamp}.pdf`;
     const filepath = path.join(pdfsDir, filename);
@@ -25,6 +65,7 @@ router.post('/register', async (req, res) => {
     const registrationData = {
       ...formData,
       pdfFilename: filename,
+      inventoryPDFFilename: inventoryPDFFilename,
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -125,6 +166,7 @@ router.post('/register', async (req, res) => {
         success: true,
         message: 'Business registration data saved to database and PDF generated',
         filename: filename,
+        inventoryPDFFilename: inventoryPDFFilename,
         filepath: filepath,
         registrationId: newRegistration._id
       });
