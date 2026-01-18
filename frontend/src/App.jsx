@@ -5,6 +5,7 @@ import { SignInPage } from "./components/SignInPage";
 import { SignUpPage } from "./components/SignUpPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RoleBasedRoute } from "./components/RoleBasedRoute";
+import { RoleSelectionPage } from "./components/RoleSelectionPage";
 import BusinessRegistration from "./components/BusinessRegistration";
 import { DashboardPage } from "./components/DashboardPage";
 import { AdminDashboard } from "./components/AdminDashboard";
@@ -24,6 +25,16 @@ export default function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/sign-in/*" element={<SignInPage />} />
           <Route path="/sign-up/*" element={<SignUpPage />} />
+          
+          {/* Role Selection - Protected Route */}
+          <Route 
+            path="/select-role" 
+            element={
+              <ProtectedRoute>
+                <RoleSelectionPage />
+              </ProtectedRoute>
+            } 
+          />
           
           {/* Business Registration - Protected Route */}
           <Route 

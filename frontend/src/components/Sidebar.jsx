@@ -78,7 +78,7 @@ export function Sidebar() {
                             {user.emailAddresses[0]?.emailAddress}
                         </p>
                         <p className="text-xs text-indigo-400 mt-1">
-                            Role: {user.publicMetadata?.role || "user"}
+                            Role: {user.unsafeMetadata?.role || "user"}
                         </p>
                     </div>
                 )}
