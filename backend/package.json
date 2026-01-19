@@ -18,6 +18,7 @@
     "express": "^5.2.1",
     "mongoose": "^8.0.0",
     "multer": "^2.0.2",
+    "openai": "^6.16.0",
     "pdfkit": "^0.15.0",
     "textract": "^2.5.0"
   },
